@@ -1,4 +1,6 @@
 opencv-python
 keras
 flask
+sklearn
+tensorflow==2.2
  

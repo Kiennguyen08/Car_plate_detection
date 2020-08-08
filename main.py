@@ -4,8 +4,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # required library
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 from os.path import splitext,basename
 from keras.models import model_from_json
 from keras.preprocessing.image import load_img, img_to_array
@@ -13,6 +11,7 @@ from keras.applications.mobilenet_v2 import preprocess_input
 from sklearn.preprocessing import LabelEncoder
 import glob
 from utils import detect_lp
+import urllib.request
 
 def load_model(path):
     try:
@@ -43,7 +42,9 @@ labels.classes_ = np.load('license_character_classes.npy')
 print("[INFO] Labels loaded successfully...")
 
 def preprocess_image(image_path,resize=False):
-    img = cv2.imread(image_path)
+    # img = cv2.imread(image_path)
+    req = urllib.request.urlopen(image_path)
+    img = np.asarray(bytearray(req.read()), dtype=np.uint8)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img / 255
     if resize:
@@ -74,8 +75,7 @@ def predict_from_model(image,model,labels):
     prediction = labels.inverse_transform([np.argmax(model.predict(image[np.newaxis,:]))])
     return prediction
 
-def main(path):
-    test_image_path = path
+def main(test_image_path):
     vehicle, LpImg,cor = get_plate(test_image_path)
     final_string = ''
     if (len(LpImg)): #check if there is at least one license image
@@ -119,3 +119,6 @@ def main(path):
         title = np.array2string(predict_from_model(character,model,labels))
         final_string+=title.strip("'[]")
     return final_string
+
+if __name__ == "__main__":
+    main(test_image_path)
