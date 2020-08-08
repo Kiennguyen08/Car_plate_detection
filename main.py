@@ -45,13 +45,13 @@ def preprocess_image(image_path,resize=False):
     # img = cv2.imread(image_path)
     req = urllib.request.urlopen(image_path)
     img = np.asarray(bytearray(req.read()), dtype=np.uint8)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = cv2.imdecode(img, cv2.IMREAD_COLOR)
     img = img / 255
     if resize:
         img = cv2.resize(img, (224,224))
     return img
 
-def get_plate(image_path, Dmax=608, Dmin = 250):
+def get_plate(image_path, Dmax=608, Dmin = 248):
     vehicle = preprocess_image(image_path)
     ratio = float(max(vehicle.shape[:2])) / min(vehicle.shape[:2])
     side = int(ratio * Dmin)
