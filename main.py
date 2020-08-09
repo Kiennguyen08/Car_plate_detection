@@ -51,13 +51,29 @@ def preprocess_image(image_path,resize=False):
         img = cv2.resize(img, (224,224))
     return img
 
-def get_plate(image_path, Dmax=608, Dmin = 248):
+
+def preprocess_ver2(image,resize=False):
+    image = image / 255
+    if resize:
+        img = cv2.resize(image, (224,224))
+    return image
+
+def get_plate(image_path, Dmax=608, Dmin = 250):
     vehicle = preprocess_image(image_path)
     ratio = float(max(vehicle.shape[:2])) / min(vehicle.shape[:2])
     side = int(ratio * Dmin)
     bound_dim = min(side, Dmax)
     _ , LpImg, _, cor = detect_lp(wpod_net, vehicle, bound_dim, lp_threshold=0.5)
     return vehicle, LpImg, cor
+
+def get_plate_ver2(image, Dmax=608, Dmin = 250):
+    vehicle = preprocess_ver2(image)
+    ratio = float(max(vehicle.shape[:2])) / min(vehicle.shape[:2])
+    side = int(ratio * Dmin)
+    bound_dim = min(side, Dmax)
+    _ , LpImg, _, cor = detect_lp(wpod_net, vehicle, bound_dim, lp_threshold=0.5)
+    return vehicle, LpImg, cor
+
 
 # Create sort_contours() function to grab the contour of each digit from left to right
 def sort_contours(cnts,reverse = False):
@@ -76,7 +92,7 @@ def predict_from_model(image,model,labels):
     return prediction
 
 def main(test_image_path):
-    vehicle, LpImg,cor = get_plate(test_image_path)
+    vehicle, LpImg,cor = get_plate_ver2(test_image_path)
     final_string = ''
     if (len(LpImg)): #check if there is at least one license image
         # Scales, calculates absolute values, and converts the result to 8-bit.
